@@ -1,0 +1,10 @@
+{
+    "version": 3,
+    "mappings": "ACAA,OAAO,CAAC,sEAAI",
+    "sources": [
+        "Time.scss",
+        "../../assets/sass/custom.scss"
+    ],
+    "names": [],
+    "file": "Time.css"
+}
