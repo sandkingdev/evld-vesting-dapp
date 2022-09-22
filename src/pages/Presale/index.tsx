@@ -30,7 +30,7 @@ import {
 import { dAppName } from 'config';
 import { routeNames } from 'routes';
 import './index.scss';
-import Time from './Time';
+// import Time from './Time';
 import StartBanner from '../../components/Layout/StartBanner';
 import {
   ContractContext,
@@ -140,9 +140,7 @@ const Presale = () => {
 
 
   return (
-
     <>
-
       <StartBanner pageName="BUY EVLD"></StartBanner>
 
       <div className='section-2'>
@@ -155,8 +153,6 @@ const Presale = () => {
         </div>
       </div>
     </>
-
-
   );
 };
 

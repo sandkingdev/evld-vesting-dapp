@@ -51,7 +51,7 @@ const Time = () => {
   };
   
   return (
-    <Countdown date={saleStatus?.leftTimestamp} renderer={renderer} />
+    <Countdown date={0} renderer={renderer} />
   );
 };
 

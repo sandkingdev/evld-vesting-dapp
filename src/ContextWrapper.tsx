@@ -135,23 +135,23 @@ const ContextWrapper = () => {
     })();
   }, [contract, hasPendingTransactions]);
 
-  React.useEffect(() => {
-    (async () => {
-      if (!contract || !account.address) return;
-      const args = [new AddressValue(new Address(account.address))];
-      const interaction: Interaction = contract.methods.getAccountState(args);
-      const res: QueryResponseBundle | undefined = await sendQuery(contract, proxy, interaction);
-      if (!res || !res.returnCode.isSuccess()) return;
-      const value = res.firstValue.valueOf();
+  // React.useEffect(() => {
+  //   (async () => {
+  //     if (!contract || !account.address) return;
+  //     const args = [new AddressValue(new Address(account.address))];
+  //     const interaction: Interaction = contract.methods.getAccountState(args);
+  //     const res: QueryResponseBundle | undefined = await sendQuery(contract, proxy, interaction);
+  //     if (!res || !res.returnCode.isSuccess()) return;
+  //     const value = res.firstValue.valueOf();
 
-      const initialLockedAmount = convertWeiToEgld(value.user_vesting_amount.toNumber(), TOKEN_DECIMAL);
-      const currentLockedAmount = convertWeiToEgld(value.user_locked_amount.toNumber(), TOKEN_DECIMAL);
-      const claimableReleaseAmount = convertWeiToEgld(value.user_claimable_release_amount.toNumber(), TOKEN_DECIMAL);
-      const last_claim_timestamp = value.last_claim_timestamp.toNumber() * SECOND_IN_MILLI;
+  //     const initialLockedAmount = convertWeiToEgld(value.user_vesting_amount.toNumber(), TOKEN_DECIMAL);
+  //     const currentLockedAmount = convertWeiToEgld(value.user_locked_amount.toNumber(), TOKEN_DECIMAL);
+  //     const claimableReleaseAmount = convertWeiToEgld(value.user_claimable_release_amount.toNumber(), TOKEN_DECIMAL);
+  //     const last_claim_timestamp = value.last_claim_timestamp.toNumber() * SECOND_IN_MILLI;
       
-      setAccountState({initialLockedAmount, currentLockedAmount, claimableReleaseAmount, last_claim_timestamp});
-    })();
-  }, [contract, hasPendingTransactions, account]);
+  //     setAccountState({initialLockedAmount, currentLockedAmount, claimableReleaseAmount, last_claim_timestamp});
+  //   })();
+  // }, [contract, hasPendingTransactions, account]);
   // React.useEffect(() => {
   //   (async () => {
   //     if (!contract_2 || !account.address) return;

@@ -169,7 +169,7 @@ const Account = () => {
               <div className='amountcrypto'> USDC: {token2?.balance ? token2.balance : '0'}</div>
             </div>
           </div>
-          <div className="col-lg-6 col-md-6 col-sm-12 mt-5">
+          {/* <div className="col-lg-6 col-md-6 col-sm-12 mt-5">
             <div className='ev-box'>
               <h4 className='epad-account-heading'> Vesting Progress</h4>
 
@@ -179,7 +179,7 @@ const Account = () => {
               <div className='amountcrypto bottom'><strong>NEXT UNLOCK:</strong> {getDaysFromNow(accountState?.nextReleaseTimestamp)} days</div>
               <div className='amountcrypto bottom'><strong>FULL UNLOCK:</strong> {getDaysFromNow(accountState?.fullReleaseTimestamp)} days</div>
             </div>
-          </div>
+          </div> */} 
         </div>
 
         {/* <div className='row'>
