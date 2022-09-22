@@ -8,6 +8,7 @@ import {
   refreshAccount,
   sendTransactions,
   useGetAccountInfo,
+  useGetNetworkConfig,
   useGetTransactionDisplayInfo,
   useGetNotification,
   transactionServices
@@ -25,6 +26,14 @@ import {
   ArgSerializer,
   Transaction,
   U32Value,
+  AddressValue,
+  Address,
+  AbiRegistry,
+  SmartContractAbi,
+  SmartContract,
+  Interaction,
+  QueryResponseBundle,
+  ProxyProvider,
 } from '@elrondnetwork/erdjs/out';
 
 import { dAppName } from 'config';
@@ -59,7 +68,12 @@ import {
   USDC_TOKEN_ID,
   MEX_TOKEN_ID,
   GATEWAY,
-  WEGLD_TOKEN_ID
+  WEGLD_TOKEN_ID,
+  VESTING_CONTRACT_ADDRESS,
+  VESTING_CONTRACT_ABI_URL,
+  VESTING_CONTRACT_NAME,
+  VESTING_TOKEN_ID,
+  TOKEN_DECIMAL,
 } from '../../config';
 import {
   PRICES,
@@ -67,6 +81,9 @@ import {
   USDC_AMOUNT,
   AMOUT_PER_USDC
 } from 'data';
+import { TIMEOUT } from 'utils/const';
+import { sendQuery } from 'utils/transaction';
+import { convertWeiToEgld } from 'utils/convert';
 
 import Loading from '../../components/LoadingPage/loadingPage';
 
@@ -77,7 +94,7 @@ const Presale = () => {
   const tokenSaleTargetRef = React.useRef(null);
 
   const saleStatus = React.useContext<ISaleStatusProvider | undefined>(SaleStatusContext);
-  const accountState = React.useContext<IAccountStateProvider | undefined>(AccountStateContext);
+  // const accountState = React.useContext<IAccountStateProvider | undefined>(AccountStateContext);
   // const accountState_2 = React.useContext<IAccountStateProvider_2 | undefined>(AccountStateContext_2);
   // const accountState_3 = React.useContext<IAccountStateProvider_3 | undefined>(AccountStateContext_3);
 
@@ -97,31 +114,58 @@ const Presale = () => {
   const [buyButtonDisabled, setBuyButtonDisabled] = React.useState<boolean>(false);
   const [buyPermissionInfo, setBuyPermissionInfo] = React.useState<string>('');
   const { address } = useGetAccountInfo();
+  const { network } = useGetNetworkConfig();
   const isLoggedIn = Boolean(address);
   const [isTransaction, setIsTransaction] = React.useState<boolean>(true);
-  
+  const proxy = new ProxyProvider(network.apiAddress, { timeout: TIMEOUT });
 
-  async function buyToken(e: any, index: number) {
-    e.preventDefault();
+  // load smart contract abi and parse it to SmartContract object for tx
+  const [contract, setContract] = React.useState<any>(undefined);
+  React.useEffect(() => {
+    (async () => {
+      const abiRegistry = await AbiRegistry.load({
+        urls: [VESTING_CONTRACT_ABI_URL],
+      });
+      const con = new SmartContract({
+        address: new Address(VESTING_CONTRACT_ADDRESS),
+        abi: new SmartContractAbi(abiRegistry, [VESTING_CONTRACT_NAME]),
+      });
+      setContract(con);
+    })();
+  }, []); // [] makes useEffect run once
+
+  const [vestingAddress, setVestingAddress] = React.useState<string>('');
+  const [vestingAmount, setVestingAmount] = React.useState<number>(0);
+
+  const handleVestingAddress = (e: any) => {
+    const address = e.target.value;
+    setVestingAddress(address.trim());
+  };
+
+  const handleVestingAmount = (e: any) => {
+    setVestingAmount(e.target.value);
+  };
+
+  const handleVesting = async () => {
+    if (vestingAddress.length <= 0 || vestingAmount <= 0) return;
 
     if (!isLoggedIn) {
       alert('Authentication with your wallet is required');
       return;
     }
-    // const amount = new BigNumber(BUY_AMOUNT[index]);
 
-    // USDC
-    const value = (new BigNumber(USDC_AMOUNT[index])).multipliedBy(Math.pow(10, 6));
+    const value = (new BigNumber(vestingAmount)).multipliedBy(Math.pow(10, 6));
     const args: TypedValue[] = [
-      BytesValue.fromUTF8(USDC_TOKEN_ID),
+      BytesValue.fromUTF8(VESTING_TOKEN_ID),
       new BigUIntValue(Balance.fromString(value.valueOf()).valueOf()),
-      BytesValue.fromUTF8('buy'),
+      BytesValue.fromUTF8('vesting'),
+      new AddressValue(new Address(vestingAddress.trim())),
     ];
 
     const { argumentsString } = new ArgSerializer().valuesToString(args);
     const data = new TransactionPayload(`ESDTTransfer@${argumentsString}`);
     const tx = {
-      receiver: PRESALE_CONTRACT_ADDRESS,
+      receiver: VESTING_CONTRACT_ADDRESS,
       gasLimit: new GasLimit(GAS_LIMIT),
       data: data.toString(),
     };
@@ -135,21 +179,71 @@ const Presale = () => {
       transactions: tx
     });
 
-  }
+  };
+
+  const [accountState, setAccountState] = React.useState<IAccountStateProvider>();
+  const handleAddress = async (address: any) => {
+    // console.log(address);
+    const args = [new AddressValue(new Address(address))];
+    const interaction: Interaction = contract.methods.getAccountState(args);
+    const res: QueryResponseBundle | undefined = await sendQuery(contract, proxy, interaction);
+    if (!res || !res.returnCode.isSuccess()) return;
+    const value = res.firstValue.valueOf();
+
+    const initialLockedAmount = convertWeiToEgld(value.user_vesting_amount.toNumber(), TOKEN_DECIMAL);
+    const currentLockedAmount = convertWeiToEgld(value.user_locked_amount.toNumber(), TOKEN_DECIMAL);
+    const claimableReleaseAmount = convertWeiToEgld(value.user_claimable_release_amount.toNumber(), TOKEN_DECIMAL);
+    const last_claim_timestamp = value.last_claim_timestamp.toNumber() * SECOND_IN_MILLI;
+
+    setAccountState({ initialLockedAmount, currentLockedAmount, claimableReleaseAmount, last_claim_timestamp });
+  };
+
+  const handleClaim = async () => {
+    const tx = {
+      data: 'claim',
+      receiver: VESTING_CONTRACT_ADDRESS,
+      gasLimit: new GasLimit(GAS_LIMIT),
+    };
+    await refreshAccount();
+    await sendTransactions({
+      transactions: tx
+    });
+  };
 
 
 
   return (
     <>
-      <StartBanner pageName="BUY EVLD"></StartBanner>
-
-      <div className='section-2'>
-        <div className='div-block-19'>
-        </div>
-      </div>
+      <StartBanner pageName="VESTING"></StartBanner>
 
       <div className='section-4 container'>
-        <div className=' row '>
+        <div className='row'>
+          {/* <div className='col-lg-3 col-md-3 col-sm-12'></div>
+          <div className='col-lg-6 col-md-6 col-sm-12'>
+            
+          </div>
+          <div className='col-lg-3 col-md-3 col-sm-12'></div> */}
+          Address: <input type='text' className='mb-3' value={vestingAddress} onChange={handleVestingAddress}></input>
+          <br />
+          Amount: <input type='number' value={vestingAmount} onChange={handleVestingAmount}></input>
+          <br />
+          <button className='mt-3' onClick={handleVesting}>vesting</button>
+        </div>
+        <div className='row mt-5'>
+          <button onClick={handleClaim}>Claim</button>
+        </div>
+        <div className='row mt-5'>Addresses</div>
+        <div className='row mt-3'>
+          <div className='col-lg-5 col-md-5 col-sm-12'>
+            {saleStatus?.addresses.map((item: any, index: any) => {
+              return <p key={index} onClick={() => handleAddress(item.toString())} style={{ cursor: 'pointer' }}>{item.toString()}</p>;
+            })}
+          </div>
+          <div className='col-lg-7 col-md-7 col-sm-12'>
+            <p>initialLockedAmount : {accountState?.initialLockedAmount}</p>
+            <p>currentLockedAmount : {accountState?.currentLockedAmount}</p>
+            <p>last_claim_timestamp : {accountState?.last_claim_timestamp}</p>
+          </div>
         </div>
       </div>
     </>

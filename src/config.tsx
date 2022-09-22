@@ -1,8 +1,8 @@
-export const ENVIRONMENT = 'mainnet';
-export const GATEWAY = 'https://api.elrond.com';
+// export const ENVIRONMENT = 'mainnet';
+// export const GATEWAY = 'https://api.elrond.com';
 
-// export const ENVIRONMENT = 'devnet';
-// export const GATEWAY = 'https://devnet-api.elrond.com';
+export const ENVIRONMENT = 'devnet';
+export const GATEWAY = 'https://devnet-api.elrond.com';
 
 export const dAppName = 'Evoload';
 
@@ -10,6 +10,7 @@ export const dAppName = 'Evoload';
 export const VESTING_CONTRACT_ADDRESS = 'erd1qqqqqqqqqqqqqpgql4nul2lhsy2z3d5pqgj0wmuva8fjwafh5zvs8qcytr';
 export const VESTING_CONTRACT_ABI_URL = '/abi/evld-vesting.abi.json';
 export const VESTING_CONTRACT_NAME = 'EvldVesting';
+export const VESTING_TOKEN_ID = 'EVLD-f33a32';
 
 export const PRESALE_CONTRACT_ADDRESS = 'erd1qqqqqqqqqqqqqpgqwrgwyc0ngwt8fqh7tdsx2295exk9fewzudlsa8n0w9';
 // export const PRESALE_CONTRACT_ADDRESS = 'erd1qqqqqqqqqqqqqpgqns3h26tghsgg3agutdzckwukqyvgujvm5zvs5fvvlc';
