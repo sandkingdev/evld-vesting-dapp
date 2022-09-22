@@ -181,7 +181,12 @@ const Presale = () => {
 
   };
 
-  const [accountState, setAccountState] = React.useState<IAccountStateProvider>();
+  const [accountState, setAccountState] = React.useState<IAccountStateProvider>({
+    initialLockedAmount: 0, 
+    currentLockedAmount: 0, 
+    claimableReleaseAmount: 0, 
+    last_claim_timestamp: 0
+  });
   const handleAddress = async (address: any) => {
     // console.log(address);
     const args = [new AddressValue(new Address(address))];
@@ -242,7 +247,8 @@ const Presale = () => {
           <div className='col-lg-7 col-md-7 col-sm-12'>
             <p>initialLockedAmount : {accountState?.initialLockedAmount}</p>
             <p>currentLockedAmount : {accountState?.currentLockedAmount}</p>
-            <p>last_claim_timestamp : {accountState?.last_claim_timestamp}</p>
+            <p>claimableReleaseAmount : {accountState?.claimableReleaseAmount}</p>
+            <p>last_claim_timestamp : {new Date(accountState?.last_claim_timestamp).toUTCString()}</p>
           </div>
         </div>
       </div>
