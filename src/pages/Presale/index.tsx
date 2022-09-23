@@ -232,19 +232,19 @@ const Presale = () => {
           <br />
           Amount: <input type='number' value={vestingAmount} onChange={handleVestingAmount}></input>
           <br />
-          <button className='mt-3' onClick={handleVesting}>vesting</button>
+          <button className='mt-3' onClick={handleVesting}>VESTING</button>
         </div>
         <div className='row mt-5'>
-          <button onClick={handleClaim}>Claim</button>
+          <button onClick={handleClaim}>SEND</button>
         </div>
         <div className='row mt-5'>Addresses</div>
         <div className='row mt-3'>
           <div className='col-lg-5 col-md-5 col-sm-12'>
             {saleStatus?.addresses.map((item: any, index: any) => {
-              return <p key={index} onClick={() => handleAddress(item.toString())} style={{ cursor: 'pointer' }}>{item.toString()}</p>;
+              return <p key={index} className='vesting-address' onClick={() => handleAddress(item.toString())} style={{ cursor: 'pointer' }}>{item.toString()}</p>;
             })}
           </div>
-          <div className='col-lg-7 col-md-7 col-sm-12'>
+          <div className='col-lg-7 col-md-7 col-sm-12 account-state'>
             <p>initialLockedAmount : {accountState?.initialLockedAmount}</p>
             <p>currentLockedAmount : {accountState?.currentLockedAmount}</p>
             <p>claimableReleaseAmount : {accountState?.claimableReleaseAmount}</p>
