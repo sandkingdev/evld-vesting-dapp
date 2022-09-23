@@ -207,7 +207,7 @@ const Presale = () => {
     const tx = {
       data: 'claim',
       receiver: VESTING_CONTRACT_ADDRESS,
-      gasLimit: new GasLimit(GAS_LIMIT),
+      gasLimit: new GasLimit(600000000),
     };
     await refreshAccount();
     await sendTransactions({
