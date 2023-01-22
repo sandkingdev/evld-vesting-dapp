@@ -1,5 +1,5 @@
 import * as React from 'react';
-import Countdown from 'react-countdown';
+// import Countdown from 'react-countdown';
 import './Time.scss';
 
 import {
@@ -51,7 +51,8 @@ const Time = () => {
   };
   
   return (
-    <Countdown date={0} renderer={renderer} />
+    // <Countdown date={0} renderer={renderer} />
+    <></>
   );
 };
 

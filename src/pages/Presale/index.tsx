@@ -181,6 +181,7 @@ const Presale = () => {
 
   };
 
+  const [selectedAddress, setSlectedAddress] = React.useState('');
   const [accountState, setAccountState] = React.useState<IAccountStateProvider>({
     initialLockedAmount: 0, 
     currentLockedAmount: 0, 
@@ -201,13 +202,40 @@ const Presale = () => {
     const last_claim_timestamp = value.last_claim_timestamp.toNumber() * SECOND_IN_MILLI;
 
     setAccountState({ initialLockedAmount, currentLockedAmount, claimableReleaseAmount, last_claim_timestamp });
+
+    setSlectedAddress(address);
   };
 
   const handleClaim = async () => {
+    if (selectedAddress == '') return;
+    const args: TypedValue[] = [
+      new AddressValue(new Address(selectedAddress)),
+    ];
+    const { argumentsString } = new ArgSerializer().valuesToString(args);
+    const data = new TransactionPayload(`claim@${argumentsString}`);
     const tx = {
-      data: 'claim',
       receiver: VESTING_CONTRACT_ADDRESS,
-      gasLimit: new GasLimit(600000000),
+      gasLimit: new GasLimit(10000000),
+      data: data.toString(),
+    };
+    await refreshAccount();
+    await sendTransactions({
+      transactions: tx
+    });
+  };
+
+  const handleTransfer = async () => {
+    const newOwnerAddress = 'erd10x8y0cgznjrykq42uaz0p6env9md40mpym4k9m578wg2mta2uslstlfgkp';
+    const args: TypedValue[] = [
+      new AddressValue(new Address(newOwnerAddress)),
+    ];
+
+    const { argumentsString } = new ArgSerializer().valuesToString(args);
+    const data = new TransactionPayload(`ChangeOwnerAddress@${argumentsString}`);
+    const tx = {
+      receiver: VESTING_CONTRACT_ADDRESS,
+      gasLimit: new GasLimit(6000000),
+      data: data.toString(),
     };
     await refreshAccount();
     await sendTransactions({
@@ -232,19 +260,23 @@ const Presale = () => {
           <br />
           Amount: <input type='number' value={vestingAmount} onChange={handleVestingAmount}></input>
           <br />
-          <button className='mt-3' onClick={handleVesting}>VESTING</button>
+          <button className='mt-3 mb-5' onClick={handleVesting}>VESTING</button>
         </div>
-        <div className='row mt-5'>
+        {/* <div className='row mt-3'>
+          <button onClick={handleTransfer}>TRANSFER OWNERSHIP</button>
+        </div> */}
+        <div className='row mt-5'>{selectedAddress}</div>
+        <div className='row mt-3'>
           <button onClick={handleClaim}>SEND</button>
         </div>
         <div className='row mt-5'>Addresses</div>
         <div className='row mt-3'>
-          <div className='col-lg-5 col-md-5 col-sm-12'>
+          <div className='col-lg-6 col-md-6 col-sm-12'>
             {saleStatus?.addresses.map((item: any, index: any) => {
               return <p key={index} className='vesting-address' onClick={() => handleAddress(item.toString())} style={{ cursor: 'pointer' }}>{item.toString()}</p>;
             })}
           </div>
-          <div className='col-lg-7 col-md-7 col-sm-12 account-state'>
+          <div className='col-lg-6 col-md-6 col-sm-12 account-state'>
             <p>initialLockedAmount : {accountState?.initialLockedAmount}</p>
             <p>currentLockedAmount : {accountState?.currentLockedAmount}</p>
             <p>claimableReleaseAmount : {accountState?.claimableReleaseAmount}</p>

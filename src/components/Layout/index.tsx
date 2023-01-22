@@ -9,7 +9,7 @@ import './index.scss';
 
 
 
-const Layout = ({ children }: { children: React.ReactNode }) => {
+const Layout = ({ children }: { children: any }) => {
   const { pathname, search } = useLocation();
 
   
